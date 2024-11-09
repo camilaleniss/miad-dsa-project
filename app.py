@@ -17,6 +17,7 @@ server = app.server
 # Load data from CSV
 def load_data():
     data = pd.read_csv('data/Crime_Data_from_2020_to_Present.csv')
+    data['Offense Severity'] = data['Part 1-2'].map({1: "Serious", 2: "Less Serious"})
     return data
 
 # Load the dataset
@@ -55,7 +56,7 @@ def plot_weapon_desc(data):
             "xanchor": "center",
             "yanchor": "top",
             "font": {
-                "size": 20,  # Increase the font size for the title
+                "size": 20, 
                 "color": "#333"
             }
         },
@@ -74,17 +75,103 @@ def plot_weapon_desc(data):
 
     return fig
 
-# Dashboard layout
+# Generate histogram for 'Part 1-2' column
+def plot_part_1_2_histogram(data):
+    fig = px.histogram(
+        data,
+        x='Offense Severity',
+        color='Offense Severity',  # Color by category to differentiate Part 1 and Part 2
+        title="Frequency of Serious and Less Serious Offenses",
+        color_discrete_map={"Serious": "#2C98A0", "Less serious": "#B0F2BC"}  # Custom colors for clarity
+    )
+
+    # Update layout for readability
+    fig.update_layout(
+        title_x=0.5,
+        xaxis_title="Offense Severity",
+        yaxis_title="Count",
+        font=dict(size=12, color="#333"),
+        legend=dict(title="Offense Type", font=dict(size=10)),
+        margin=dict(t=50, b=50, l=50, r=50)
+    )
+
+    return fig
+
+# Generate histogram for 'Vict Sex' column
+def plot_vict_sex_histogram(data):
+    fig = px.histogram(
+        data,
+        x='Vict Sex',
+        color='Vict Sex',
+        title="Distribution of Victim Sex",
+        color_discrete_sequence=px.colors.sequential.Tealgrn_r
+    )
+
+    fig.update_layout(
+        title_x=0.5,
+        xaxis_title="Victim Sex",
+        yaxis_title="Count",
+        font=dict(size=12, color="#333"),
+        legend=dict(title="Victim Sex", font=dict(size=10)),
+        margin=dict(t=50, b=50, l=50, r=50)
+    )
+
+    return fig
+
+# Generate histogram for 'Vict Age' column
+def plot_vict_age_histogram(data):
+    fig = px.histogram(
+        data,
+        x='Vict Age',
+        title="Distribution of Victim Age",
+        nbins=20,  # Adjust number of bins for age grouping
+        color_discrete_sequence=px.colors.sequential.Tealgrn_r
+    )
+
+    fig.update_layout(
+        title_x=0.5,
+        xaxis_title="Victim Age",
+        yaxis_title="Count",
+        font=dict(size=12, color="#333"),
+        margin=dict(t=50, b=50, l=50, r=50)
+    )
+
+    return fig
+
+# Update app layout with arranged graphs
 app.layout = html.Div(
     children=[
         html.H1("Crimes in USA"),
-        dcc.Graph(
-            id="weapon_desc_pie_chart",
-            figure=plot_weapon_desc(data)  # Set initial figure to display
+        html.Div(
+            children=[
+                dcc.Graph(
+                    id="weapon_desc_pie_chart",
+                    figure=plot_weapon_desc(data),  # Pie chart for Weapon Desc
+                    style={"width": "75%"}
+                ),
+                dcc.Graph(
+                    id="part_1_2_histogram",
+                    figure=plot_part_1_2_histogram(data),  # Histogram for Offense Severity
+                    style={"width": "35%"} 
+                )
+            ],
+            style={"display": "flex", "justify-content": "space-between"}
+        ),
+        html.Div(
+            children=[
+                dcc.Graph(
+                    id="vict_sex_histogram",
+                    figure=plot_vict_sex_histogram(data)  # Histogram for Victim Sex
+                ),
+                dcc.Graph(
+                    id="vict_age_histogram",
+                    figure=plot_vict_age_histogram(data)  # Histogram for Victim Age
+                )
+            ],
+            style={"display": "flex", "justify-content": "space-between"}
         )
     ]
 )
-
 
 # Run the server
 if __name__ == "__main__":
