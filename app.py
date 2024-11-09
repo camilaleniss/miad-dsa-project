@@ -23,6 +23,11 @@ def load_data():
 # Load the dataset
 data = load_data()
 
+def sample_data(data, sample_size=10000):
+    if len(data) > sample_size:
+        data = data.sample(n=sample_size, random_state=42)  # Randomly sample rows
+    return data
+
 # Generate pie chart for 'Weapon Desc' variable
 def plot_weapon_desc(data):
     # Count the occurrences of each weapon description
@@ -138,6 +143,35 @@ def plot_vict_age_histogram(data):
 
     return fig
 
+def plot_density_map(data):
+    data_used = sample_data(data, 10000)
+    # Ensure the columns for latitude and longitude are available
+    if 'LAT' not in data_used.columns or 'LON' not in data_used.columns:
+        raise ValueError("LAT and LON columns are required for the map.")
+
+    # Create the map with scatter_mapbox
+    fig = px.density_mapbox(
+        data_used,
+        lat="LAT",
+        lon="LON",
+        hover_name="AREA NAME",  # Optional: display other info on hover
+        color_continuous_scale="Tealgrn_r",  
+        title="Crime Density Map",
+        opacity=0.6,  # Adjust opacity of the points
+        height=600
+    )
+
+    # Update map layout for a more interactive look
+    fig.update_layout(
+        mapbox_style="open-street-map",  # Set the map style (you can use other options like 'carto-positron')
+        mapbox_zoom=10,  # Initial zoom level
+        mapbox_center={"lat": 34.0522, "lon": -118.2437}, # Center in LA
+        font=dict(size=12, color="#333"),
+        margin={"r": 0, "t": 40, "l": 0, "b": 0}  # Adjust margins for a cleaner view
+    )
+
+    return fig
+
 # Update app layout with arranged graphs
 app.layout = html.Div(
     children=[
@@ -169,6 +203,10 @@ app.layout = html.Div(
                 )
             ],
             style={"display": "flex", "justify-content": "space-between"}
+        ),
+        dcc.Graph(
+            id="density_map",
+            figure=plot_density_map(data)  # Density map for LAT/LON
         )
     ]
 )
