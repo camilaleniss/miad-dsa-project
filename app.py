@@ -1,8 +1,6 @@
 import dash
 from dash import dcc
 from dash import html
-from dash.dependencies import Input, Output
-import plotly.graph_objs as go
 import pandas as pd
 import plotly.express as px
 
@@ -71,8 +69,8 @@ def plot_weapon_desc(data):
             orientation="v",
             yanchor="middle",
             y=0.5,
-            xanchor="right",
-            x=-0.3,
+            xanchor="left",
+            x=-5.5,
             font=dict(size=12)
         ),
         margin=dict(t=50, b=50, l=50, r=50)  # Add padding for a clean look
@@ -175,12 +173,19 @@ def plot_density_map(data):
 # Update app layout with arranged graphs
 app.layout = html.Div(
     children=[
-        html.H1("Crimes in USA"),
+        html.H1("Crimes in USA",
+                style={
+                "textAlign": "center",  # Center the title
+                "fontSize": 30,  # Adjust the font size
+                "color": "#333",  # Set the color to match the chart titles
+                "marginTop": 20,  # Space above the title
+                "fontFamily": "Arial, sans-serif"  # Use the same font family as the charts
+            }),
         html.Div(
             children=[
                 dcc.Graph(
-                    id="weapon_desc_pie_chart",
-                    figure=plot_weapon_desc(data),  # Pie chart for Weapon Desc
+                    id="density_map",
+                    figure=plot_density_map(data),  # Density map for LAT/LON
                     style={"width": "75%"}
                 ),
                 dcc.Graph(
@@ -191,6 +196,10 @@ app.layout = html.Div(
             ],
             style={"display": "flex", "justify-content": "space-between"}
         ),
+        dcc.Graph(
+                    id="weapon_desc_pie_chart",
+                    figure=plot_weapon_desc(data),  # Pie chart for Weapon Desc
+                ),
         html.Div(
             children=[
                 dcc.Graph(
@@ -202,12 +211,14 @@ app.layout = html.Div(
                     figure=plot_vict_age_histogram(data)  # Histogram for Victim Age
                 )
             ],
-            style={"display": "flex", "justify-content": "space-between"}
-        ),
-        dcc.Graph(
-            id="density_map",
-            figure=plot_density_map(data)  # Density map for LAT/LON
-        )
+           style={
+                "display": "flex",
+                "justify-content": "center",  # Center the histograms
+                "gap": "2rem",  # Add space between the graphs
+                "width": "80%",  # Set a maximum width for better alignment
+                "margin": "0 auto"  # Center the container div
+            }
+        ) 
     ]
 )
 
