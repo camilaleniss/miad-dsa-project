@@ -81,6 +81,7 @@ Opcion 1: Instalar aws cli
 - `aws configure set aws_session_token SESSIONTOKEN`
 
 Opcion 2: definir variables de entorno (Si no se instalo AWS CLI)
+
 export AWS_SECRET_ACCESS_KEY=
 
 export  AWS_ACCESS_KEY_ID=
