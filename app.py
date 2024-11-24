@@ -6,7 +6,7 @@ import plotly.express as px
 from dash import Input, Output, State
 import requests
 
-api_url = "http://127.0.0.1:8000/predict"
+api_url = "http://127.0.0.1:8000/predict" # change for the one in AWS
 
 # Initialize the app
 app = dash.Dash(
@@ -219,10 +219,13 @@ def plot_density_map(data):
         State("longitude_input", "value")
     ]
 )
-def predict_severity(n_clicks, area_name, district, victim_age, crime_code, premises, status, lat, lon):
+def predict_severity(n_clicks, area_name="Hollywood", district=0, victim_age=0, crime_code="Dummy", premises="Dummy", status="Dummy", lat=0, lon=0):
     if n_clicks is None:
         return "Submit the form to see the prediction."
     
+    if area_name == None:
+        return ""
+
     area_code = area_mapping[area_name]
     crime_code_converted = crime_mapping[crime_code]
     premises_code = premis_mapping[premises]
@@ -267,27 +270,31 @@ app.layout = html.Div(
     children=[
         html.H1("Crimes in USA",
                 style={
-                "textAlign": "center",  # Center the title
-                "fontSize": 30,  # Adjust the font size
-                "color": "#333",  # Set the color to match the chart titles
-                "marginTop": 20,  # Space above the title
-                "fontFamily": "Arial, sans-serif"  # Use the same font family as the charts
-            }),
+                    "textAlign": "center",  # Center the title
+                    "fontSize": 30,  # Adjust the font size
+                    "color": "#333",  # Set the color to match the chart titles
+                    "marginTop": 20,  # Space above the title
+                    "fontFamily": "Arial, sans-serif"  # Use the same font family as the charts
+                }),
+        
+        # Main container holding form and heatmap
         html.Div(
             children=[
-                # Inputs section
+                # Inputs section (form)
                 html.Div(
                     children=[
                         html.Label("Area Name:", style={"marginBottom": "10px"}),
                         dcc.Dropdown(id="area_name_dropdown", options=area_name_options, placeholder="Select Area Name", style={"marginBottom": "15px"}),
+                        
                         # Reporting District Number
                         html.Div(
                             children=[
                                 html.Label("Reporting District Number:", style={"marginBottom": "10px"}),
                                 dcc.Input(id="district_input", type="number", placeholder="Enter District Number", style=number_input_css)
-                                ],
+                            ],
                             style={"display": "flex", "flexDirection": "column", "marginBottom": "20px"}
                         ),
+                        
                         # Victim Age
                         html.Div(
                             children=[
@@ -296,12 +303,16 @@ app.layout = html.Div(
                             ],
                             style={"display": "flex", "flexDirection": "column", "marginBottom": "20px"}
                         ),
+                        
                         html.Label("Crime Code:", style={"marginBottom": "10px"}),
                         dcc.Dropdown(id="crime_code_dropdown", options=crime_code_options, placeholder="Select Crime Code", style={"marginBottom": "15px"}),
+                        
                         html.Label("Premises:", style={"marginBottom": "10px"}),
                         dcc.Dropdown(id="premises_dropdown", options=premises_options, placeholder="Select Premises", style={"marginBottom": "15px"}),
+                        
                         html.Label("Status:", style={"marginBottom": "10px"}),
                         dcc.Dropdown(id="status_dropdown", options=status_options, placeholder="Select Status", style={"marginBottom": "15px"}),
+                        
                         # Latitude
                         html.Div(
                             children=[
@@ -338,17 +349,26 @@ app.layout = html.Div(
 
                         html.Div(id="severity_output", style={"fontSize": "18px", "marginTop": "20px", "padding": "10px", "border": "1px solid #ddd", "borderRadius": "5px",  "fontFamily": "Arial, sans-serif", "color": "#333333"})
                     ],
-                    style={"width": "30%", "display": "inline-block", "verticalAlign": "top", "padding": "20px", "border": "1px solid #ddd", "borderRadius": "5px", "margin": "20px",  "fontFamily": "Arial, sans-serif"}
+                    style={"flex": "1", "padding": "20px", "border": "1px solid #ddd", "borderRadius": "5px", "fontFamily": "Arial, sans-serif"}
                 ),
-            ],
-            style={"display": "flex", "justifyContent": "space-between", "flexDirection": "column"}
-        ),
-        html.Div(
-            children=[
+                
+                # Heatmap
                 dcc.Graph(
                     id="density_map",
                     figure=plot_density_map(data),  # Density map for LAT/LON
-                    style={"width": "75%"}
+                    style={"flex": "2", "height": "800px"}  # Increase height of the map for better view
+                )
+            ],
+            style={"display": "flex", "justifyContent": "space-between", "gap": "20px", "alignItems": "flex-start", "marginBottom": "10px"}
+        ),
+        
+        # Additional Graphs (Pie Chart and Histograms)
+        html.Div(
+            children=[
+                 dcc.Graph(
+                    id="weapon_desc_pie_chart",
+                    figure=plot_weapon_desc(data),  # Pie chart for Weapon Desc
+                    style={"width": "65%"}
                 ),
                 dcc.Graph(
                     id="part_1_2_histogram",
@@ -356,12 +376,8 @@ app.layout = html.Div(
                     style={"width": "35%"} 
                 )
             ],
-            style={"display": "flex", "justify-content": "space-between"}
+            style={"display": "flex", "justifyContent": "space-between", "marginBottom": "10px"}
         ),
-        dcc.Graph(
-                    id="weapon_desc_pie_chart",
-                    figure=plot_weapon_desc(data),  # Pie chart for Weapon Desc
-                ),
         html.Div(
             children=[
                 dcc.Graph(
@@ -375,14 +391,15 @@ app.layout = html.Div(
             ],
            style={
                 "display": "flex",
-                "justify-content": "center",  # Center the histograms
+                "justifyContent": "center",  # Center the histograms
                 "gap": "2rem",  # Add space between the graphs
                 "width": "80%",  # Set a maximum width for better alignment
                 "margin": "0 auto"  # Center the container div
             }
-        ) 
+        )
     ]
 )
+
 
 
 # Run the server
