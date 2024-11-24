@@ -260,6 +260,8 @@ def predict_severity(n_clicks, area_name, district, victim_age, crime_code, prem
         return f"Error: {str(e)}"
     
 
+number_input_css = { "marginBottom": "15px", "padding": "10px", "border": "1px solid #ddd", "borderRadius": "5px",  "backgroundColor": "#f9f9f9", "fontSize": "14px", "boxShadow": "0 2px 5px rgba(0, 0, 0, 0.1)","outline": "none"}
+
 # Update app layout with arranged graphs
 app.layout = html.Div(
     children=[
@@ -276,33 +278,70 @@ app.layout = html.Div(
                 # Inputs section
                 html.Div(
                     children=[
-                        html.Label("Area Name:"),
-                        dcc.Dropdown(id="area_name_dropdown", options=area_name_options, placeholder="Select Area Name"),
-                        html.Label("Reporting District Number:"),
-                        dcc.Input(id="district_input", type="number", placeholder="Enter District Number"),
-                        html.Label("Victim Age:"),
-                        dcc.Input(id="victim_age_input", type="number", placeholder="Enter Victim Age"),
-                        html.Label("Crime Code:"),
-                        dcc.Dropdown(id="crime_code_dropdown", options=crime_code_options, placeholder="Select Crime Code"),
-                        html.Label("Premises:"),
-                        dcc.Dropdown(id="premises_dropdown", options=premises_options, placeholder="Select Premises"),
-                        html.Label("Status:"),
-                        dcc.Dropdown(id="status_dropdown", options=status_options, placeholder="Select Status"),
-                        html.Label("Latitude:"),
-                        dcc.Input(id="latitude_input", type="number", placeholder="Enter Latitude"),
-                        html.Label("Longitude:"),
-                        dcc.Input(id="longitude_input", type="number", placeholder="Enter Longitude"),
-                        html.Button("Submit", id="submit_button", n_clicks=0, style={"marginTop": "10px"})
+                        html.Label("Area Name:", style={"marginBottom": "10px"}),
+                        dcc.Dropdown(id="area_name_dropdown", options=area_name_options, placeholder="Select Area Name", style={"marginBottom": "15px"}),
+                        # Reporting District Number
+                        html.Div(
+                            children=[
+                                html.Label("Reporting District Number:", style={"marginBottom": "10px"}),
+                                dcc.Input(id="district_input", type="number", placeholder="Enter District Number", style=number_input_css)
+                                ],
+                            style={"display": "flex", "flexDirection": "column", "marginBottom": "20px"}
+                        ),
+                        # Victim Age
+                        html.Div(
+                            children=[
+                                html.Label("Victim Age:", style={"marginBottom": "10px"}),
+                                dcc.Input(id="victim_age_input", type="number", placeholder="Enter Victim Age", style=number_input_css)
+                            ],
+                            style={"display": "flex", "flexDirection": "column", "marginBottom": "20px"}
+                        ),
+                        html.Label("Crime Code:", style={"marginBottom": "10px"}),
+                        dcc.Dropdown(id="crime_code_dropdown", options=crime_code_options, placeholder="Select Crime Code", style={"marginBottom": "15px"}),
+                        html.Label("Premises:", style={"marginBottom": "10px"}),
+                        dcc.Dropdown(id="premises_dropdown", options=premises_options, placeholder="Select Premises", style={"marginBottom": "15px"}),
+                        html.Label("Status:", style={"marginBottom": "10px"}),
+                        dcc.Dropdown(id="status_dropdown", options=status_options, placeholder="Select Status", style={"marginBottom": "15px"}),
+                        # Latitude
+                        html.Div(
+                            children=[
+                                html.Label("Latitude:", style={"marginBottom": "10px"}),
+                                dcc.Input(id="latitude_input", type="number", placeholder="Enter Latitude", style=number_input_css)
+                            ],
+                            style={"display": "flex", "flexDirection": "column", "marginBottom": "20px"}
+                        ),
+
+                        # Longitude
+                        html.Div(
+                            children=[
+                                html.Label("Longitude:", style={"marginBottom": "10px"}),
+                                dcc.Input(id="longitude_input", type="number", placeholder="Enter Longitude", style=number_input_css)
+                            ],
+                            style={"display": "flex", "flexDirection": "column", "marginBottom": "20px"}
+                        ),
+                
+                        # Submit Button
+                        html.Button("Submit", id="submit_button", n_clicks=0, 
+                                    style={
+                                            "padding": "12px 20px",  # Increase padding for a bigger button
+                                            "backgroundColor": "#4CAF50",  # Green background for visibility
+                                            "color": "white",  # White text
+                                            "border": "none",  # Remove default border
+                                            "borderRadius": "5px",  # Rounded corners
+                                            "fontSize": "16px",  # Slightly larger font
+                                            "fontWeight": "bold",  # Bold font for emphasis
+                                            "cursor": "pointer",  # Change cursor to pointer
+                                            "width": "100%",  # Full width for better alignment
+                                            "boxShadow": "0 4px 8px rgba(0, 0, 0, 0.1)",  # Subtle shadow
+                                            "transition": "background-color 0.3s, transform 0.2s",  # Smooth transition for background and transform
+                                        }),
+
+                        html.Div(id="severity_output", style={"fontSize": "18px", "marginTop": "20px", "padding": "10px", "border": "1px solid #ddd", "borderRadius": "5px",  "fontFamily": "Arial, sans-serif", "color": "#333333"})
                     ],
-                    style={"width": "30%", "display": "inline-block", "verticalAlign": "top", "padding": "20px", "border": "1px solid #ddd", "borderRadius": "5px", "margin": "20px"}
+                    style={"width": "30%", "display": "inline-block", "verticalAlign": "top", "padding": "20px", "border": "1px solid #ddd", "borderRadius": "5px", "margin": "20px",  "fontFamily": "Arial, sans-serif"}
                 ),
-                # Output section
-                html.Div(
-                    id="severity_output",
-                    style={"fontSize": "18px", "marginTop": "20px", "padding": "10px", "border": "1px solid #ddd", "borderRadius": "5px"}
-                )
             ],
-            style={"display": "flex", "justifyContent": "space-between"}
+            style={"display": "flex", "justifyContent": "space-between", "flexDirection": "column"}
         ),
         html.Div(
             children=[
