@@ -89,7 +89,7 @@ export  AWS_ACCESS_KEY_ID=
 export  AWS_SESSION_TOKEN=
 
 Una vez se tenga instalado dvc y se cuente con acceso programatico a AWS se debe ejecutar el siguiente comando para traer del BucketS3 los archivos del proyecto, los cuales quedaran en el folder "data":
-- `pip install dvc`
+- `dvc pull`
 
 ## MLflow
 
