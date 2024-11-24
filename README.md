@@ -70,6 +70,7 @@ Nuestra herramienta de control de versiones de datos es DVC. Para poder trabajar
 - `pip install "dvc[s3]`
 
 Para descargar los datos localmente requeriras tener configurado:
+
 Opcion 1: Instalar aws cli
 - `curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o ~/"awscliv2.zip" `
 - `sudo apt install unzip`
@@ -78,10 +79,16 @@ Opcion 1: Instalar aws cli
 - `Configurar credenciales de AWS`
 - `aws configure --> Se debe insertar la secret key y la acess key. La region debe ser us-east-1`
 - `aws configure set aws_session_token SESSIONTOKEN`
+
 Opcion 2: definir variables de entorno (Si no se instalo AWS CLI)
 export AWS_SECRET_ACCESS_KEY=
+
 export  AWS_ACCESS_KEY_ID=
+
 export  AWS_SESSION_TOKEN=
+
+Una vez se tenga instalado dvc y se cuente con acceso programatico a AWS se debe ejecutar el siguiente comando para traer del BucketS3 los archivos del proyecto, los cuales quedaran en el folder "data":
+- `pip install dvc`
 
 ## MLflow
 
