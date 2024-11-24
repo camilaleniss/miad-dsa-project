@@ -6,7 +6,7 @@ import plotly.express as px
 from dash import Input, Output, State
 import requests
 
-api_url = "http://127.0.0.1:8000/predict" # change for the one in AWS
+api_url = "http://54.204.68.195:8001/predict" # change for the one in AWS
 
 # Initialize the app
 app = dash.Dash(
@@ -404,4 +404,4 @@ app.layout = html.Div(
 
 # Run the server
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(host='0.0.0.0', port=8050, debug=True)
