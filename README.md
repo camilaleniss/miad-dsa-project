@@ -67,7 +67,7 @@ If you have any suggestions to improve this dataset or wish to contribute, feel 
 Nuestra herramienta de control de versiones de datos es DVC. Para poder trabajar con los datos originales, los cuales se encuentran almacenados en S3 se debe instalar DVC ejecutando:
 
 - `pip install dvc`
-- `pip install "dvc[s3]`
+- `pip install "dvc[s3]"`
 
 Para descargar los datos localmente requeriras tener configurado:
 
