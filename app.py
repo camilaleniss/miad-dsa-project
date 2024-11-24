@@ -3,6 +3,10 @@ from dash import dcc
 from dash import html
 import pandas as pd
 import plotly.express as px
+from dash import Input, Output, State
+import requests
+
+api_url = "http://127.0.0.1:8000/predict"
 
 # Initialize the app
 app = dash.Dash(
@@ -20,6 +24,33 @@ def load_data():
 
 # Load the dataset
 data = load_data()
+
+# Extract unique values for dropdowns
+def get_unique_values(data, column):
+    return [{"label": value, "value": value} for value in data[column].dropna().unique()]
+
+area_name_options = get_unique_values(data, "AREA NAME")
+crime_code_options = get_unique_values(data, "Crm Cd Desc")
+premises_options = get_unique_values(data, "Premis Desc")
+status_options = get_unique_values(data, "Status Desc")
+
+area_mapping = data[['AREA', 'AREA NAME']].drop_duplicates().set_index('AREA NAME')['AREA'].to_dict()
+crime_mapping = data[['Crm Cd', 'Crm Cd Desc']].drop_duplicates().set_index('Crm Cd Desc')['Crm Cd'].to_dict()
+premis_mapping = data[['Premis Cd', 'Premis Desc']].drop_duplicates().set_index('Premis Desc')['Premis Cd'].to_dict()
+
+status_mapping = {
+    "Invest Cont": 0,
+    "Adult Other": 1,
+    "Adult Arrest": 2,
+    "Juv Arrest": 3,
+    "Juv Other": 4,
+    "UNK": 5
+}
+
+severity_mapping = {
+    1: "Serious",
+    2: "Less Serious"
+}
 
 def sample_data(data, sample_size=10000):
     if len(data) > sample_size:
@@ -170,6 +201,65 @@ def plot_density_map(data):
 
     return fig
 
+
+# Add a callback to handle input changes and prediction
+@app.callback(
+    Output("severity_output", "children"),
+    [
+        Input("submit_button", "n_clicks")
+    ],
+    [
+        State("area_name_dropdown", "value"),
+        State("district_input", "value"),
+        State("victim_age_input", "value"),
+        State("crime_code_dropdown", "value"),
+        State("premises_dropdown", "value"),
+        State("status_dropdown", "value"),
+        State("latitude_input", "value"),
+        State("longitude_input", "value")
+    ]
+)
+def predict_severity(n_clicks, area_name, district, victim_age, crime_code, premises, status, lat, lon):
+    if n_clicks is None:
+        return "Submit the form to see the prediction."
+    
+    area_code = area_mapping[area_name]
+    crime_code_converted = crime_mapping[crime_code]
+    premises_code = premis_mapping[premises]
+    status_code = status_mapping[status]
+
+    # Create payload to send to the API
+    payload = {
+        "AREA": area_code,
+        "Rpt_Dist_No": district,
+        "Crm_Cd": crime_code_converted,
+        "Vict_Age": victim_age,
+        "Premis_Cd": premises_code,
+        "Status": status_code,
+        "Status_Desc": status_code,
+        "Crm_Cd_1": crime_code_converted,
+        "LAT": lat,
+        "LON": lon
+    }
+    
+    try:
+        # Make the API request
+        response = requests.post(api_url, json=payload)
+        
+        # If the request is successful
+        if response.status_code == 200:
+            prediction = response.json()  # Get the prediction from the response
+            severity = prediction['prediction']  # Assuming the API returns a key 'prediction'
+            converted_severity = severity_mapping[severity]
+
+            return f"The crime will be treated as a {converted_severity} case"
+
+        else:
+            return f"Error: {response.status_code} - {response.text}"
+    except Exception as e:
+        return f"Error: {str(e)}"
+    
+
 # Update app layout with arranged graphs
 app.layout = html.Div(
     children=[
@@ -181,6 +271,39 @@ app.layout = html.Div(
                 "marginTop": 20,  # Space above the title
                 "fontFamily": "Arial, sans-serif"  # Use the same font family as the charts
             }),
+        html.Div(
+            children=[
+                # Inputs section
+                html.Div(
+                    children=[
+                        html.Label("Area Name:"),
+                        dcc.Dropdown(id="area_name_dropdown", options=area_name_options, placeholder="Select Area Name"),
+                        html.Label("Reporting District Number:"),
+                        dcc.Input(id="district_input", type="number", placeholder="Enter District Number"),
+                        html.Label("Victim Age:"),
+                        dcc.Input(id="victim_age_input", type="number", placeholder="Enter Victim Age"),
+                        html.Label("Crime Code:"),
+                        dcc.Dropdown(id="crime_code_dropdown", options=crime_code_options, placeholder="Select Crime Code"),
+                        html.Label("Premises:"),
+                        dcc.Dropdown(id="premises_dropdown", options=premises_options, placeholder="Select Premises"),
+                        html.Label("Status:"),
+                        dcc.Dropdown(id="status_dropdown", options=status_options, placeholder="Select Status"),
+                        html.Label("Latitude:"),
+                        dcc.Input(id="latitude_input", type="number", placeholder="Enter Latitude"),
+                        html.Label("Longitude:"),
+                        dcc.Input(id="longitude_input", type="number", placeholder="Enter Longitude"),
+                        html.Button("Submit", id="submit_button", n_clicks=0, style={"marginTop": "10px"})
+                    ],
+                    style={"width": "30%", "display": "inline-block", "verticalAlign": "top", "padding": "20px", "border": "1px solid #ddd", "borderRadius": "5px", "margin": "20px"}
+                ),
+                # Output section
+                html.Div(
+                    id="severity_output",
+                    style={"fontSize": "18px", "marginTop": "20px", "padding": "10px", "border": "1px solid #ddd", "borderRadius": "5px"}
+                )
+            ],
+            style={"display": "flex", "justifyContent": "space-between"}
+        ),
         html.Div(
             children=[
                 dcc.Graph(
@@ -221,6 +344,7 @@ app.layout = html.Div(
         ) 
     ]
 )
+
 
 # Run the server
 if __name__ == "__main__":
